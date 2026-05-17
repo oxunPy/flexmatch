@@ -3,5 +3,5 @@ package main
 import "fmt"
 
 func main() {
-	fmt.Println("match-service")
+	fmt.Println("match-services")
 }

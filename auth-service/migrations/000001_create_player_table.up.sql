@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS players
+(
+    id         SERIAL PRIMARY KEY,
+    username   VARCHAR(255) UNIQUE NOT NULL,
+    firstname  VARCHAR(255) NOT NULL,
+    lastname   VARCHAR(255),
+    email      VARCHAR(255) UNIQUE NOT NULL,
+    password   VARCHAR(255) NOT NULL,
+    disabled   BOOL      DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
