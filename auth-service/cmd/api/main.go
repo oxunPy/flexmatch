@@ -25,7 +25,7 @@ func main() {
 	router := gin.Default()
 	_ = router.SetTrustedProxies(nil)
 	router.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, "Flexmatch auth home!")
+		c.JSON(http.StatusOK, "auth-service")
 	})
 
 	routes.Setup(router, pool, cfg)
