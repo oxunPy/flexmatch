@@ -10,25 +10,25 @@ import (
 func Setup(pool *pgxpool.Pool, router *gin.Engine) {
 	var weapon = router.Group("weapon")
 	{
-		weapon.POST("/create", handlers.CreateWeaponHandler())
-		weapon.GET("/list", handlers.GetAllWeaponsHandler())
-		weapon.POST("/buy", handlers.BuyWeaponHandler())
-		weapon.POST("/sell", handlers.SellWeaponHandler())
+		weapon.POST("/create", handlers.CreateWeaponHandler(pool))
+		weapon.GET("/list", handlers.GetAllWeaponsHandler(pool))
+		weapon.POST("/buy", handlers.BuyWeaponHandler(pool))
+		weapon.POST("/sell", handlers.SellWeaponHandler(pool))
 	}
 
 	var skin = router.Group("skin")
 	{
-		skin.POST("/create", handlers.CreateSkinHandler())
-		skin.GET("/list", handlers.GetAllSkinsHandler())
-		skin.POST("/buy", handlers.BuySkinHandler())
-		skin.POST("/sell", handlers.SellSkinHandler())
+		skin.POST("/create", handlers.CreateSkinHandler(pool))
+		skin.GET("/list", handlers.GetAllSkinsHandler(pool))
+		skin.POST("/buy", handlers.BuySkinHandler(pool))
+		skin.POST("/sell", handlers.SellSkinHandler(pool))
 	}
 
 	var armor = router.Group("armor")
 	{
-		armor.POST("/create", handlers.CreateArmorHandler())
-		armor.GET("/list", handlers.GetAllArmorsHandler())
-		armor.POST("/buy", handlers.BuyArmorHandler())
-		armor.POST("/sell", handlers.SellArmorHandler())
+		armor.POST("/create", handlers.CreateArmorHandler(pool))
+		armor.GET("/list", handlers.GetAllArmorsHandler(pool))
+		armor.POST("/buy", handlers.BuyArmorHandler(pool))
+		armor.POST("/sell", handlers.SellArmorHandler(pool))
 	}
 }

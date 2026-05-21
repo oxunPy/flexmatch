@@ -14,4 +14,4 @@ CREATE TABLE IF NOT EXISTS player_armors
     player_id BIGINT NOT NULL,
     armor_id  UUID   NOT NULL,
     CONSTRAINT pk_player_armor PRIMARY KEY (player_id, armor_id)
-)
+);

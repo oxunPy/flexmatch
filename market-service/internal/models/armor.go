@@ -9,7 +9,7 @@ type Armor struct {
 	Cost    float64         `json:"cost" db:"cost"`
 	Attr    ArmorAttributes `json:"attr" db:"attr"`
 	Visuals DataFile        `json:"visuals" db:"visuals"`
-	Created time.Time       `json:"created" db:"updated"`
+	Created time.Time       `json:"created" db:"created"`
 	Updated time.Time       `json:"updated" db:"updated"`
 }
 

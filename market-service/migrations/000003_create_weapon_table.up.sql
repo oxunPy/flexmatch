@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS weapons
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name        VARCHAR(255)   NOT NULL,
     description TEXT,
+    weapon_type INT           NOT NULL DEFAULT 0,
     attr        JSONB,
     cost        NUMERIC(19, 2) NOT NULL,
     created     TIMESTAMP        DEFAULT CURRENT_TIMESTAMP,
