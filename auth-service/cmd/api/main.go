@@ -1,13 +1,10 @@
 package main
 
 import (
+	"auth-service/internal/app"
 	"auth-service/internal/config"
-	"auth-service/internal/database"
-	"auth-service/internal/routes"
+	"auth-service/internal/handlers"
 	"log"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -15,23 +12,12 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to load configuration:\n", err)
 	}
-	pool, err := database.Connect(cfg.DatabaseURL)
-	if err != nil {
-		log.Fatal("Failed to connect database:\n", err)
-	}
 
-	defer pool.Close()
+	app := app.New(cfg)
+	defer app.Stop()
 
-	router := gin.Default()
-	_ = router.SetTrustedProxies(nil)
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, "auth-service")
-	})
+	rest := handlers.NewRestController(app.GetGinRouter(), app.GetContainer())
+	rest.Setup()
 
-	routes.Setup(router, pool, cfg)
-
-	err = router.Run(":" + cfg.Port)
-	if err != nil {
-		log.Fatal()
-	}
+	app.Run()
 }

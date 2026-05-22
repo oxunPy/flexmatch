@@ -18,3 +18,14 @@ migrate-status:
 
 migrate-force:
 	migrate -path migrations -database "$(DATABASE_URL)" force $(version)
+
+gen:
+	@protoc \
+	--proto_path=protos "protos/protobuf/sso.proto" \
+	--go_out=protos/gen/sso --go_opt=paths=source_relative \
+	--go-grpc_out=protos/gen/sso --go-grpc_opt=paths=source_relative
+
+	@protoc \
+    	--proto_path=protos "protos/protobuf/token.proto" \
+    	--go_out=protos/gen/token --go_opt=paths=source_relative \
+    	--go-grpc_out=protos/gen/token --go-grpc_opt=paths=source_relative

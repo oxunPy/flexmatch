@@ -7,7 +7,11 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func Connect(databaseUrl string) (*pgxpool.Pool, error) {
+type PostgresStorage struct {
+	*pgxpool.Pool
+}
+
+func NewStorage(databaseUrl string) (*PostgresStorage, error) {
 	ctx := context.Background()
 	config, err := pgxpool.ParseConfig(databaseUrl)
 	if err != nil {
@@ -27,5 +31,7 @@ func Connect(databaseUrl string) (*pgxpool.Pool, error) {
 	}
 
 	log.Println("Successfully connected to PostgreSQL database")
-	return pool, nil
+	return &PostgresStorage{
+		Pool: pool,
+	}, nil
 }

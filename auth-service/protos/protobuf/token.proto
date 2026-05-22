@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package token;
+option go_package = "github.com/simplecoding/v1";
+
+service Token {
+  rpc CheckToken(TokenRequest) returns (TokenResponse);
+}
+
+message TokenRequest {
+  string token = 1;
+}
+
+message TokenResponse {
+  string token = 1;
+  bool expired = 2;
+  bool invalid = 3;
+}

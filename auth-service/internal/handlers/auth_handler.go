@@ -1,10 +1,7 @@
 package handlers
 
-import "C"
 import (
-	"auth-service/internal/config"
 	"auth-service/internal/models"
-	"auth-service/internal/repos"
 	"auth-service/internal/security"
 	"fmt"
 	"net/http"
@@ -12,7 +9,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -24,12 +20,7 @@ type RegisterPlayerRequest struct {
 	Password  string `json:"password" binding:"required"`
 }
 
-type LoginPlayerRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-func CreatePlayerHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+func (rest *RestController) CreatePlayerHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var request RegisterPlayerRequest
 		if err := c.BindJSON(&request); err != nil {
@@ -54,7 +45,7 @@ func CreatePlayerHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 			return
 		}
 
-		player, err := repos.CreateNewPlayer(pool, models.Player{
+		player, err := rest.PlayerRepo.CreateNewPlayer(models.Player{
 			Username:  request.Username,
 			Email:     request.Email,
 			Firstname: request.Firstname,
@@ -73,7 +64,12 @@ func CreatePlayerHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 	}
 }
 
-func LoginPlayerHandler(pool *pgxpool.Pool, cfg *config.Config) gin.HandlerFunc {
+type LoginPlayerRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+func (rest *RestController) LoginPlayerHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var request LoginPlayerRequest
 		if err := c.BindJSON(&request); err != nil {
@@ -83,7 +79,7 @@ func LoginPlayerHandler(pool *pgxpool.Pool, cfg *config.Config) gin.HandlerFunc 
 			return
 		}
 
-		player, err := repos.GetPlayer(pool, request.Username)
+		player, err := rest.PlayerRepo.GetPlayer(request.Username)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": "Player not found",
@@ -105,7 +101,7 @@ func LoginPlayerHandler(pool *pgxpool.Pool, cfg *config.Config) gin.HandlerFunc 
 			"email":    player.Email,
 			"exp":      exp,
 		}
-		token, err := security.NewToken(&claims, cfg.JWTSecret)
+		token, err := security.NewToken(&claims, rest.Cfg.JWTSecret)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": fmt.Sprintf("JWT err: %v\n", err),
@@ -113,7 +109,7 @@ func LoginPlayerHandler(pool *pgxpool.Pool, cfg *config.Config) gin.HandlerFunc 
 			return
 		}
 
-		pt, err := repos.CreatePlayerToken(pool, models.PlayerToken{
+		pt, err := rest.TokenRepo.CreatePlayerToken(models.PlayerToken{
 			Token:     *token,
 			PlayerID:  player.ID,
 			Player:    *player,
@@ -130,7 +126,7 @@ func LoginPlayerHandler(pool *pgxpool.Pool, cfg *config.Config) gin.HandlerFunc 
 	}
 }
 
-func GetMe() gin.HandlerFunc {
+func (rest *RestController) GetMe() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 	}

@@ -1,14 +1,23 @@
 package repos
 
 import (
+	"auth-service/internal/database"
 	"auth-service/internal/models"
 	"context"
 	"time"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func CreateNewPlayer(pool *pgxpool.Pool, player models.Player) (*models.Player, error) {
+type PlayerRepo struct {
+	storage *database.PostgresStorage
+}
+
+func NewPlayerRepo(storage *database.PostgresStorage) *PlayerRepo {
+	return &PlayerRepo{
+		storage: storage,
+	}
+}
+
+func (r *PlayerRepo) CreateNewPlayer(player models.Player) (*models.Player, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -19,7 +28,7 @@ func CreateNewPlayer(pool *pgxpool.Pool, player models.Player) (*models.Player, 
 	`
 
 	var p models.Player
-	err := pool.QueryRow(ctx, query,
+	err := r.storage.QueryRow(ctx, query,
 		player.Username,
 		player.Firstname,
 		player.Lastname,
@@ -44,11 +53,7 @@ func CreateNewPlayer(pool *pgxpool.Pool, player models.Player) (*models.Player, 
 	return &p, nil
 }
 
-func Disable() {
-
-}
-
-func GetPlayer(pool *pgxpool.Pool, username string) (*models.Player, error) {
+func (r *PlayerRepo) GetPlayer(username string) (*models.Player, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -59,7 +64,7 @@ func GetPlayer(pool *pgxpool.Pool, username string) (*models.Player, error) {
 	`
 
 	var p models.Player
-	err := pool.QueryRow(ctx, query, username).Scan(
+	err := r.storage.QueryRow(ctx, query, username).Scan(
 		&p.ID,
 		&p.Username,
 		&p.Firstname,

@@ -1,14 +1,23 @@
 package repos
 
 import (
+	"auth-service/internal/database"
 	"auth-service/internal/models"
 	"context"
 	"time"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func CreatePlayerToken(pool *pgxpool.Pool, pt models.PlayerToken) (*models.PlayerToken, error) {
+type TokenRepo struct {
+	storage *database.PostgresStorage
+}
+
+func NewTokenRepo(storage *database.PostgresStorage) *TokenRepo {
+	return &TokenRepo{
+		storage: storage,
+	}
+}
+
+func (r *TokenRepo) CreatePlayerToken(pt models.PlayerToken) (*models.PlayerToken, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -19,7 +28,7 @@ func CreatePlayerToken(pool *pgxpool.Pool, pt models.PlayerToken) (*models.Playe
 	`
 
 	var newPt models.PlayerToken
-	err := pool.QueryRow(ctx, query, pt.Token, pt.ID, pt.ExpiredAt).Scan(
+	err := r.storage.QueryRow(ctx, query, pt.Token, pt.ID, pt.ExpiredAt).Scan(
 		&newPt.ID,
 		&newPt.Token,
 		&newPt.PlayerID,
