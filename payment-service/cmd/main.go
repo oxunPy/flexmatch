@@ -2,12 +2,9 @@ package main
 
 import (
 	"log"
-	"net/http"
+	"payment-service/internal/app"
 	"payment-service/internal/config"
-	"payment-service/internal/database"
-	"payment-service/internal/routes"
-
-	"github.com/gin-gonic/gin"
+	"payment-service/internal/handlers"
 )
 
 func main() {
@@ -16,20 +13,11 @@ func main() {
 		log.Fatal("err load config", err)
 	}
 
-	pool, err := database.Connect(cfg.DatabaseURL)
-	if err != nil {
-		log.Fatal("err connect database", err)
-	}
+	app := app.New(cfg)
+	defer app.Stop()
 
-	router := gin.Default()
-	router.SetTrustedProxies(nil)
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, "payment-service")
-	})
+	rest := handlers.NewRestController(app.GetGinRouter(), app.GetContainer())
+	rest.Setup()
 
-	routes.Setup(router, pool)
-
-	if err := router.Run(); err != nil {
-		log.Fatal()
-	}
+	app.Run()
 }

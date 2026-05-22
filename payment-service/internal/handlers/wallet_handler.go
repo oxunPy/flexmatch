@@ -4,20 +4,18 @@ import (
 	"fmt"
 	"net/http"
 	"payment-service/internal/models"
-	"payment-service/internal/repos"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type CreateWalletResponse struct {
 	Success bool          `json:"success"`
 	Info    string        `json:"info"`
-	Wallet  models.Wallet `json:"wallet"`
+	Wallet  models.Wallet `json:"wallet.proto"`
 }
 
-func CreateWalletHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+func (rest *RestController) CreateWalletHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		playerID, err := strconv.ParseInt(c.Query("player_id"), 10, 64)
 		if err != nil {
@@ -26,17 +24,17 @@ func CreateWalletHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 			})
 			return
 		}
-		wlt, err := repos.CreateWallet(pool, playerID)
+		wlt, err := rest.WalletRepo.CreateWallet(playerID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": fmt.Sprintf("err creating new wallet: %s", err.Error()),
+				"error": fmt.Sprintf("err creating new wallet.proto: %s", err.Error()),
 			})
 			return
 		}
 
 		c.JSON(http.StatusOK, CreateWalletResponse{
 			Success: true,
-			Info:    "Created new wallet successfully",
+			Info:    "Created new wallet.proto successfully",
 			Wallet:  *wlt,
 		})
 	}
@@ -48,7 +46,7 @@ type GetMyWalletsResponse struct {
 	Wallets  []*models.Wallet `json:"wallets"`
 }
 
-func GetMyWalletsHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+func (rest *RestController) GetMyWalletsHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		playerID, err := strconv.ParseInt(c.Query("player_id"), 10, 64)
 		if err != nil {
@@ -58,7 +56,7 @@ func GetMyWalletsHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 			return
 		}
 
-		wallets, err := repos.GetMyWallets(pool, playerID)
+		wallets, err := rest.WalletRepo.GetMyWallets(playerID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": fmt.Sprintf("err get my wallets: %s", err.Error()),
@@ -80,9 +78,9 @@ type GetAllWalletsResponse struct {
 	PlayerWallets map[int64][]*models.Wallet `json:"player_wallets"`
 }
 
-func GetAllWalletsHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+func (rest *RestController) GetAllWalletsHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		wallets, err := repos.GetWalletsList(pool)
+		wallets, err := rest.WalletRepo.GetWalletsList()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": fmt.Sprintf("err get my wallets: %s", err.Error()),

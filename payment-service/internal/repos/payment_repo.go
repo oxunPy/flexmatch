@@ -2,13 +2,22 @@ package repos
 
 import (
 	"context"
+	"payment-service/internal/database"
 	"payment-service/internal/models"
 	"time"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func CreatePayment(pool *pgxpool.Pool, pay models.Payment) (*models.Payment, error) {
+type PaymentRepo struct {
+	storage *database.PostgresStorage
+}
+
+func NewPaymentRepo(storage *database.PostgresStorage) *PaymentRepo {
+	return &PaymentRepo{
+		storage: storage,
+	}
+}
+
+func (r *PaymentRepo) CreatePayment(pay models.Payment) (*models.Payment, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -19,7 +28,7 @@ func CreatePayment(pool *pgxpool.Pool, pay models.Payment) (*models.Payment, err
 	`
 
 	var newPay models.Payment
-	err := pool.QueryRow(ctx, query,
+	err := r.storage.QueryRow(ctx, query,
 		pay.ItemID,
 		pay.PlayerID,
 		pay.Type,
@@ -33,7 +42,7 @@ func CreatePayment(pool *pgxpool.Pool, pay models.Payment) (*models.Payment, err
 	return &newPay, nil
 }
 
-func GetAllPaymentList(pool *pgxpool.Pool) ([]*models.Payment, error) {
+func (r *PaymentRepo) GetAllPaymentList() ([]*models.Payment, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -42,7 +51,7 @@ func GetAllPaymentList(pool *pgxpool.Pool) ([]*models.Payment, error) {
 		FROM payments
 	`
 
-	rows, err := pool.Query(ctx, query)
+	rows, err := r.storage.Query(ctx, query)
 	if err != nil {
 		return nil, err
 	}

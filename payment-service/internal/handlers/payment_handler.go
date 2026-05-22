@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"payment-service/internal/models"
-	"payment-service/internal/repos"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type CreatePaymentRequest struct {
@@ -24,7 +22,7 @@ type CreatePaymentResponse struct {
 	Payment models.Payment `json:"payment"`
 }
 
-func CreatePaymentHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+func (rest *RestController) CreatePaymentHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req CreatePaymentRequest
 		if err := c.BindJSON(&req); err != nil {
@@ -34,7 +32,7 @@ func CreatePaymentHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 			return
 		}
 
-		pay, err := repos.CreatePayment(pool, models.Payment{
+		pay, err := rest.PaymentRepo.CreatePayment(models.Payment{
 			ItemID:   req.ItemID,
 			PlayerID: req.PlayerID,
 		})
@@ -59,9 +57,9 @@ type GetAllPaymentsResponse struct {
 	List    []*models.Payment `json:"list"`
 }
 
-func GetAllPaymentsHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+func (rest *RestController) GetAllPaymentsHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		pays, err := repos.GetAllPaymentList(pool)
+		pays, err := rest.PaymentRepo.GetAllPaymentList()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": fmt.Sprintf("err get all payments: %s", err.Error()),

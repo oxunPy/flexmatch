@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package payment;
+option go_package = "github.com/simplecoding/v1";
+
+
+service PaymentService {
+  rpc CreatePayment(CreatePaymentRequest) returns (CreatePaymentResponse);
+
+  rpc GetPayments(GetPaymentsRequest) returns (GetPaymentsResponse);
+}
+
+message CreatePaymentRequest {
+
+}
+
+message CreatePaymentResponse {
+
+}
+
+message GetPaymentsRequest {
+
+}
+
+message GetPaymentsResponse {
+
+}

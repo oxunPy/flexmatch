@@ -14,7 +14,7 @@ func Setup(router *gin.Engine, pool *pgxpool.Pool) {
 		payment.POST("/create", handlers.CreatePaymentHandler(pool))
 	}
 
-	var wallet = router.Group("/wallet")
+	var wallet = router.Group("/wallet.proto")
 	{
 		wallet.POST("/create", handlers.CreateWalletHandler(pool))
 		wallet.GET("/my", handlers.GetMyWalletsHandler(pool))

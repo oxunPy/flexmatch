@@ -1,0 +1,6 @@
+CREATE TABLE wallets (
+    id SERIAL PRIMARY KEY,
+    player_id BIGINT NOT NULL,
+    balance NUMERIC(19, 2) NOT NULL,
+    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

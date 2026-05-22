@@ -2,13 +2,22 @@ package repos
 
 import (
 	"context"
+	"payment-service/internal/database"
 	"payment-service/internal/models"
 	"time"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func CreateWallet(pool *pgxpool.Pool, playerID int64) (*models.Wallet, error) {
+type WalletRepo struct {
+	storage *database.PostgresStorage
+}
+
+func NewWalletRepo(storage *database.PostgresStorage) *WalletRepo {
+	return &WalletRepo{
+		storage: storage,
+	}
+}
+
+func (r *WalletRepo) CreateWallet(playerID int64) (*models.Wallet, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -19,7 +28,7 @@ func CreateWallet(pool *pgxpool.Pool, playerID int64) (*models.Wallet, error) {
 	`
 
 	var wallet models.Wallet
-	err := pool.
+	err := r.storage.
 		QueryRow(ctx, query, playerID, float64(0)).
 		Scan(&wallet.ID, &wallet.PlayerID, &wallet.Balance, &wallet.Created)
 
@@ -30,7 +39,7 @@ func CreateWallet(pool *pgxpool.Pool, playerID int64) (*models.Wallet, error) {
 	return &wallet, err
 }
 
-func GetMyWallets(pool *pgxpool.Pool, playerID int64) ([]*models.Wallet, error) {
+func (r *WalletRepo) GetMyWallets(playerID int64) ([]*models.Wallet, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -40,7 +49,7 @@ func GetMyWallets(pool *pgxpool.Pool, playerID int64) ([]*models.Wallet, error) 
 		WHERE player_id = $1
 	`
 
-	rows, err := pool.Query(ctx, query, playerID)
+	rows, err := r.storage.Query(ctx, query, playerID)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +67,7 @@ func GetMyWallets(pool *pgxpool.Pool, playerID int64) ([]*models.Wallet, error) 
 	return wallets, nil
 }
 
-func GetWalletsList(pool *pgxpool.Pool) ([]*models.Wallet, error) {
+func (r *WalletRepo) GetWalletsList() ([]*models.Wallet, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
@@ -67,7 +76,7 @@ func GetWalletsList(pool *pgxpool.Pool) ([]*models.Wallet, error) {
 		FROM wallets
 	`
 
-	rows, err := pool.Query(ctx, query)
+	rows, err := r.storage.Query(ctx, query)
 	if err != nil {
 		return nil, err
 	}

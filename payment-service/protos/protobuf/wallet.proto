@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package wallet;
+option go_package = "github.com/simplecoding/v1";
+
+service WalletService {
+  rpc CheckBalance(BalanceRequest) returns (BalanceResponse);
+
+  rpc GetWallets(WalletsRequest) returns (WalletsResponse);
+}
+
+message Wallet {
+  int64 id = 1;
+  int64 player_id = 2;
+  double balance = 3;
+}
+
+message BalanceRequest {
+  int64 wallet_id = 1;
+  double withdraw = 2;
+}
+
+message BalanceResponse {
+  bool enought = 1;
+  int64 wallet_id = 2;
+}
+
+message WalletsRequest {
+  int64 player_id = 1;
+}
+
+message WalletsResponse {
+  int64 player_id = 1;
+  repeated Wallet wallets = 2;
+}
