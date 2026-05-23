@@ -16,7 +16,7 @@ func NewRouter(port int) *GinRouter {
 	router := gin.Default()
 	_ = router.SetTrustedProxies(nil)
 	router.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, "auth-service")
+		c.JSON(http.StatusOK, "sso-service")
 	})
 
 	return &GinRouter{

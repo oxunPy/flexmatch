@@ -3,7 +3,7 @@ package grpc
 import (
 	"context"
 	"payment-service/internal/services"
-	v1 "payment-service/protos/gen/wallet/protobuf"
+	v1 "protos-service/protos/gen/wallet/protobuf"
 )
 
 type WalletServiceApi struct {

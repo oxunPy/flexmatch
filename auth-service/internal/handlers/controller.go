@@ -21,7 +21,7 @@ func NewRestController(
 }
 
 func (rest *RestController) Setup() {
-	auth := rest.router.Group("/auth")
+	auth := rest.router.Group("/sso")
 	{
 		auth.POST("/register", rest.CreatePlayerHandler())
 		auth.POST("/login", rest.LoginPlayerHandler())
