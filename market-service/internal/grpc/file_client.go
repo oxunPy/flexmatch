@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	v1 "payment-service/protos/gen/payment/protobuf"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

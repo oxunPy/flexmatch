@@ -2,8 +2,8 @@ package grpc
 
 import (
 	"auth-service/internal/services"
-	v1 "auth-service/protos/gen/token/protobuf"
 	"context"
+	v1 "protos-service/protos/gen/token/protobuf"
 )
 
 type TokenServiceApi struct {

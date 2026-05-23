@@ -4,7 +4,7 @@
 // - protoc             v7.34.1
 // source: protobuf/token.proto
 
-package v1
+package token
 
 import (
 	context "context"

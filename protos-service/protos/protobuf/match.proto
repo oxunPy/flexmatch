@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package match;
+option go_package = "proto-service/gen/match";
+
+service MatchService {
+  rpc StartMatch(StartMatchRequest) returns (StartMatchResponse);
+  rpc CancelMatch(CancelMatchRequest) returns (CancelMatchResponse);
+  rpc TrackMatch(TrackMatchRequest) returns (stream TrackMatchResponse);
+}
+
+message StartMatchRequest {
+
+}
+
+message StartMatchResponse {
+
+}
+
+message CancelMatchRequest {
+
+}
+
+message CancelMatchResponse {
+
+}
+
+message TrackMatchRequest {
+
+}
+
+message TrackMatchResponse {
+
+}

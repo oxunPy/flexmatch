@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package notification;
+option go_package = "protos-service/gen/notification";
+
+service NotificationService {
+  rpc SendNotification(SendNotificationRequest) returns (SendNotificationResponse);
+  rpc BulkSendNotification(BulkSendNotificationRequest) returns (BulkSendNotificationResponse);
+}
+
+enum NotificationType {
+  TYPE_UNSPECIFIED = 0;
+  TYPE_PUSH = 1;
+  TYPE_EMAIL = 2;
+  TYPE_TELEGRAM = 3;
+  TYPE_WEBSOCKET = 4;
+}
+
+enum NotificationCategory {
+  CATEGORY_UNSPECIFIED = 0;
+  CATEGORY_AUTH_OTP = 1;
+  CATEGORY_PAYMENT_SUCCESS = 2;
+  CATEGORY_PAYMENT_FAILED = 3;
+  CATEGORY_GAME_MATCHED = 4;
+  CATEGORY_SYSTEM_ALERT = 5;
+}
+
+message SendNotificationRequest {
+  string sender_id = 1;
+  string receiver_id = 2;
+  NotificationType type = 3;
+
+  string title = 4;
+  string body = 5;
+}
+
+message SendNotificationResponse {
+  string id = 1;
+  bool succes = 2;
+  string message = 3;
+}
+
+message BulkSendNotificationRequest {
+  repeated SendNotificationRequest notifications = 1;
+}
+
+message BulkSendNotificationResponse {
+  int32 total_success = 1;
+  repeated string send_ids = 2;
+}

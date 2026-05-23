@@ -4,7 +4,7 @@
 // 	protoc        v7.34.1
 // source: protobuf/sso.proto
 
-package v1
+package sso
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -366,9 +366,9 @@ const file_protobuf_sso_proto_rawDesc = "" +
 	"\blastname\x18\x04 \x01(\tR\blastname\x12\x14\n" +
 	"\x05email\x18\x05 \x01(\tR\x05email2\xa5\x01\n" +
 	"\x04Auth\x129\n" +
-	"\bRegister\x12\x15.sso.RegisterRequest\x1a\x16.sso.RegisterResponse\x120\n" +
-	"\x05Login\x12\x12.sso.LoginRequest\x1a\x13.sso.LoginResponse\x120\n" +
-	"\x05GetMe\x12\x12.sso.GetMeRequest\x1a\x13.sso.GetMeResponseB!Z\x1fgithub.com/simplecoding/sso/v1b\x06proto3"
+	"\bRegister\x12\x15.auth.RegisterRequest\x1a\x16.auth.RegisterResponse\x120\n" +
+	"\x05Login\x12\x12.auth.LoginRequest\x1a\x13.auth.LoginResponse\x120\n" +
+	"\x05GetMe\x12\x12.auth.GetMeRequest\x1a\x13.auth.GetMeResponseB\x18Z\x16protos-service/gen/ssob\x06proto3"
 
 var (
 	file_protobuf_sso_proto_rawDescOnce sync.Once
@@ -384,20 +384,20 @@ func file_protobuf_sso_proto_rawDescGZIP() []byte {
 
 var file_protobuf_sso_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_protobuf_sso_proto_goTypes = []any{
-	(*RegisterRequest)(nil),  // 0: sso.RegisterRequest
-	(*RegisterResponse)(nil), // 1: sso.RegisterResponse
-	(*LoginRequest)(nil),     // 2: sso.LoginRequest
-	(*LoginResponse)(nil),    // 3: sso.LoginResponse
-	(*GetMeRequest)(nil),     // 4: sso.GetMeRequest
-	(*GetMeResponse)(nil),    // 5: sso.GetMeResponse
+	(*RegisterRequest)(nil),  // 0: auth.RegisterRequest
+	(*RegisterResponse)(nil), // 1: auth.RegisterResponse
+	(*LoginRequest)(nil),     // 2: auth.LoginRequest
+	(*LoginResponse)(nil),    // 3: auth.LoginResponse
+	(*GetMeRequest)(nil),     // 4: auth.GetMeRequest
+	(*GetMeResponse)(nil),    // 5: auth.GetMeResponse
 }
 var file_protobuf_sso_proto_depIdxs = []int32{
-	0, // 0: sso.Auth.Register:input_type -> sso.RegisterRequest
-	2, // 1: sso.Auth.Login:input_type -> sso.LoginRequest
-	4, // 2: sso.Auth.GetMe:input_type -> sso.GetMeRequest
-	1, // 3: sso.Auth.Register:output_type -> sso.RegisterResponse
-	3, // 4: sso.Auth.Login:output_type -> sso.LoginResponse
-	5, // 5: sso.Auth.GetMe:output_type -> sso.GetMeResponse
+	0, // 0: auth.Auth.Register:input_type -> auth.RegisterRequest
+	2, // 1: auth.Auth.Login:input_type -> auth.LoginRequest
+	4, // 2: auth.Auth.GetMe:input_type -> auth.GetMeRequest
+	1, // 3: auth.Auth.Register:output_type -> auth.RegisterResponse
+	3, // 4: auth.Auth.Login:output_type -> auth.LoginResponse
+	5, // 5: auth.Auth.GetMe:output_type -> auth.GetMeResponse
 	3, // [3:6] is the sub-list for method output_type
 	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name

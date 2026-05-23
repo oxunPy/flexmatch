@@ -4,7 +4,7 @@
 // 	protoc        v7.34.1
 // source: protobuf/token.proto
 
-package v1
+package token
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -138,7 +138,7 @@ const file_protobuf_token_proto_rawDesc = "" +
 	"\ainvalid\x18\x03 \x01(\bR\ainvalid2@\n" +
 	"\x05Token\x127\n" +
 	"\n" +
-	"CheckToken\x12\x13.token.TokenRequest\x1a\x14.token.TokenResponseB\x1cZ\x1agithub.com/simplecoding/v1b\x06proto3"
+	"CheckToken\x12\x13.token.TokenRequest\x1a\x14.token.TokenResponseB\x1aZ\x18protos-service/gen/tokenb\x06proto3"
 
 var (
 	file_protobuf_token_proto_rawDescOnce sync.Once

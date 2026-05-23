@@ -21,7 +21,7 @@ message BalanceRequest {
 }
 
 message BalanceResponse {
-  bool enought = 1;
+  bool sufficient = 1;
   int64 wallet_id = 2;
 }
 

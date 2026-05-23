@@ -1,0 +1,13 @@
+go 1.26.3
+
+use (
+	./auth-service
+	./chat-service
+	./file-service
+	./game-service
+	./market-service
+	./match-service
+	./notification-service
+	./payment-service
+	./protos-service
+)

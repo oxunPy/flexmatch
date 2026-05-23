@@ -4,7 +4,7 @@
 // - protoc             v7.34.1
 // source: protobuf/sso.proto
 
-package v1
+package sso
 
 import (
 	context "context"
@@ -19,9 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Auth_Register_FullMethodName = "/sso.Auth/Register"
-	Auth_Login_FullMethodName    = "/sso.Auth/Login"
-	Auth_GetMe_FullMethodName    = "/sso.Auth/GetMe"
+	Auth_Register_FullMethodName = "/auth.Auth/Register"
+	Auth_Login_FullMethodName    = "/auth.Auth/Login"
+	Auth_GetMe_FullMethodName    = "/auth.Auth/GetMe"
 )
 
 // AuthClient is the client API for Auth service.
@@ -176,7 +176,7 @@ func _Auth_GetMe_Handler(srv interface{}, ctx context.Context, dec func(interfac
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Auth_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "sso.Auth",
+	ServiceName: "auth.Auth",
 	HandlerType: (*AuthServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
