@@ -6,10 +6,8 @@ import (
 	"net/http"
 
 	"market-service/internal/models"
-	"market-service/internal/repos"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type BuyWeaponRequest struct {
@@ -23,7 +21,7 @@ type BuyWeaponResponse struct {
 	WeaponID string `json:"weapon_id"`
 }
 
-func BuyWeaponHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+func (rest *RestController) BuyWeaponHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req BuyWeaponRequest
 		if err := c.BindJSON(&req); err != nil {
@@ -33,7 +31,7 @@ func BuyWeaponHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 			return
 		}
 
-		playerWeapon, err := repos.BuyWeapon(pool, req.WeaponID, req.PlayerID)
+		playerWeapon, err := rest.WeaponRepo.BuyWeapon(req.WeaponID, req.PlayerID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": fmt.Sprintf("error buying weapon: %s", err.Error()),
@@ -60,7 +58,7 @@ type SellWeaponResponse struct {
 	WeaponID string `json:"weapon_id"`
 }
 
-func SellWeaponHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+func (rest *RestController) SellWeaponHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req SellWeaponRequest
 		if err := c.BindJSON(&req); err != nil {
@@ -70,7 +68,7 @@ func SellWeaponHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 			return
 		}
 
-		success, err := repos.SellWeapon(pool, req.WeaponID, req.PlayerID)
+		success, err := rest.WeaponRepo.SellWeapon(req.WeaponID, req.PlayerID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": fmt.Sprintf("error selling weapon: %s", err.Error()),
@@ -100,7 +98,7 @@ type CreateWeaponResponse struct {
 	Weapon  models.Weapon `json:"weapon"`
 }
 
-func CreateWeaponHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+func (rest *RestController) CreateWeaponHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req CreateWeaponRequest
 		if err := c.BindJSON(&req); err != nil {
@@ -120,7 +118,7 @@ func CreateWeaponHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 			}
 		}
 
-		weapon, err := repos.CreateWeapon(pool, models.Weapon{
+		weapon, err := rest.WeaponRepo.CreateWeapon(models.Weapon{
 			Name: req.Name,
 			Desc: req.Desc,
 			Type: req.Type,
@@ -147,9 +145,9 @@ type GetAllWeaponsResponse struct {
 	List    []*models.Weapon `json:"list"`
 }
 
-func GetAllWeaponsHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+func (rest *RestController) GetAllWeaponsHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		list, err := repos.GetAllWeapons(pool)
+		list, err := rest.WeaponRepo.GetAllWeapons()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": fmt.Sprintf("error get all weapons: %s\n", err.Error()),

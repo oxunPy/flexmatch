@@ -2,12 +2,9 @@ package main
 
 import (
 	"log"
+	"market-service/internal/app"
 	"market-service/internal/config"
-	"market-service/internal/database"
-	"market-service/internal/routes"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
+	"market-service/internal/handlers"
 )
 
 func main() {
@@ -16,19 +13,11 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	pool, err := database.Connect(cfg.DatabaseURL)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	app := app.New(cfg)
+	defer app.Stop()
 
-	router := gin.Default()
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, "market-service")
-	})
+	rest := handlers.NewRestController(app.GetGinRouter(), app.GetContainer())
+	rest.Setup()
 
-	routes.Setup(pool, router)
-
-	if err := router.Run(":" + cfg.Port); err != nil {
-		log.Fatal()
-	}
+	app.Run()
 }

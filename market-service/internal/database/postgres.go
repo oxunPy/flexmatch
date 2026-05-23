@@ -2,28 +2,36 @@ package database
 
 import (
 	"context"
-	"fmt"
-	"log/slog"
+	"log"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func Connect(url string) (*pgxpool.Pool, error) {
+type PostgresStorage struct {
+	*pgxpool.Pool
+}
+
+func NewStorage(databaseUrl string) (*PostgresStorage, error) {
 	ctx := context.Background()
-	cfg, err := pgxpool.ParseConfig(url)
+	config, err := pgxpool.ParseConfig(databaseUrl)
 	if err != nil {
-		return nil, fmt.Errorf("error parse database url configuration: %w", err)
+		log.Printf("Unable to parse DATABASE_URL: %v\n", err)
 	}
 
-	pool, err := pgxpool.NewWithConfig(ctx, cfg)
+	pool, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
-		return nil, fmt.Errorf("error connect to database: %w", err)
+		log.Printf("Unable to create connection pool: %v\n", err)
 	}
 
-	if err := pool.Ping(ctx); err != nil {
-		return nil, fmt.Errorf("error ping database: %w", err)
+	err = pool.Ping(ctx)
+	if err != nil {
+		log.Printf("Unable to ping database: %v\n", err)
+		pool.Close()
+		return nil, err
 	}
 
-	slog.Info("successfully connected to the PostgreSQL database!")
-	return pool, nil
+	log.Println("Successfully connected to PostgreSQL database")
+	return &PostgresStorage{
+		Pool: pool,
+	}, nil
 }

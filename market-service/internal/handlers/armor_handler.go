@@ -4,11 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"market-service/internal/models"
-	"market-service/internal/repos"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type BuyArmorRequest struct {
@@ -22,7 +20,7 @@ type BuyArmorResponse struct {
 	ArmorID string `json:"armor_id"`
 }
 
-func BuyArmorHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+func (rest *RestController) BuyArmorHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req BuyArmorRequest
 		if err := c.BindJSON(&req); err != nil {
@@ -32,7 +30,7 @@ func BuyArmorHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 			return
 		}
 
-		pa, err := repos.BuyArmor(pool, req.ArmorID, req.PlayerID)
+		pa, err := rest.ArmorRepo.BuyArmor(req.ArmorID, req.PlayerID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": fmt.Sprintf("error buying armor: %s", err.Error()),
@@ -59,7 +57,7 @@ type SellArmorResponse struct {
 	ArmorID string `json:"armor_id"`
 }
 
-func SellArmorHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+func (rest *RestController) SellArmorHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req SellArmorRequest
 		if err := c.BindJSON(&req); err != nil {
@@ -69,7 +67,7 @@ func SellArmorHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 			return
 		}
 
-		succ, err := repos.SellArmor(pool, req.ArmorID, req.PlayerID)
+		succ, err := rest.ArmorRepo.SellArmor(req.ArmorID, req.PlayerID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": fmt.Sprintf("error selling armor: %s", err.Error()),
@@ -98,7 +96,7 @@ type CreateArmorResponse struct {
 	Armor   models.Armor `json:"armor"`
 }
 
-func CreateArmorHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+func (rest *RestController) CreateArmorHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req CreateArmorRequest
 		if err := c.BindJSON(&req); err != nil {
@@ -118,7 +116,7 @@ func CreateArmorHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 			}
 		}
 
-		armor, err := repos.CreateArmor(pool, models.Armor{
+		armor, err := rest.ArmorRepo.CreateArmor(models.Armor{
 			Name: req.Name,
 			Desc: req.Desc,
 			Cost: req.Cost,
@@ -146,9 +144,9 @@ type GetAllArmorsResponse struct {
 	List    []*models.Armor `json:"list"`
 }
 
-func GetAllArmorsHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+func (rest *RestController) GetAllArmorsHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		list, err := repos.GetAllArmors(pool)
+		list, err := rest.ArmorRepo.GetAllArmors()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": fmt.Sprintf("error get all armors: %s\n", err.Error()),

@@ -5,17 +5,27 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"market-service/internal/database"
 
 	"market-service/internal/models"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func BuyArmor(pool *pgxpool.Pool, armorID string, playerID int64) (*models.PlayerArmor, error) {
+type ArmorRepo struct {
+	storage *database.PostgresStorage
+}
+
+func NewArmorRepo(storage *database.PostgresStorage) *ArmorRepo {
+	return &ArmorRepo{
+		storage: storage,
+	}
+}
+
+func (r *ArmorRepo) BuyArmor(armorID string, playerID int64) (*models.PlayerArmor, error) {
 	ctx := context.Background()
 
-	exists, err := armorExists(ctx, pool, armorID)
+	exists, err := r.armorExists(ctx, armorID)
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +34,7 @@ func BuyArmor(pool *pgxpool.Pool, armorID string, playerID int64) (*models.Playe
 	}
 
 	var playerArmor models.PlayerArmor
-	err = pool.QueryRow(ctx, `
+	err = r.storage.QueryRow(ctx, `
 		INSERT INTO player_armors (player_id, armor_id)
 		VALUES ($1, $2::uuid)
 		ON CONFLICT (player_id, armor_id) DO UPDATE SET armor_id = EXCLUDED.armor_id
@@ -37,8 +47,8 @@ func BuyArmor(pool *pgxpool.Pool, armorID string, playerID int64) (*models.Playe
 	return &playerArmor, nil
 }
 
-func SellArmor(pool *pgxpool.Pool, armorID string, playerID int64) (bool, error) {
-	commandTag, err := pool.Exec(context.Background(), `
+func (r *ArmorRepo) SellArmor(armorID string, playerID int64) (bool, error) {
+	commandTag, err := r.storage.Exec(context.Background(), `
 		DELETE FROM player_armors
 		WHERE player_id = $1 AND armor_id = $2::uuid
 	`, playerID, armorID)
@@ -49,7 +59,7 @@ func SellArmor(pool *pgxpool.Pool, armorID string, playerID int64) (bool, error)
 	return commandTag.RowsAffected() > 0, nil
 }
 
-func CreateArmor(pool *pgxpool.Pool, armor models.Armor) (*models.Armor, error) {
+func (r *ArmorRepo) CreateArmor(armor models.Armor) (*models.Armor, error) {
 	attr, err := json.Marshal(armor.Attr)
 	if err != nil {
 		return nil, fmt.Errorf("encode armor attr: %w", err)
@@ -57,7 +67,7 @@ func CreateArmor(pool *pgxpool.Pool, armor models.Armor) (*models.Armor, error) 
 
 	var created models.Armor
 	var rawAttr []byte
-	err = pool.QueryRow(context.Background(), `
+	err = r.storage.QueryRow(context.Background(), `
 		INSERT INTO armors (name, description, cost, attr)
 		VALUES ($1, $2, $3, $4)
 		RETURNING id::text, name, description, cost, attr, created, updated
@@ -83,8 +93,8 @@ func CreateArmor(pool *pgxpool.Pool, armor models.Armor) (*models.Armor, error) 
 	return &created, nil
 }
 
-func GetAllArmors(pool *pgxpool.Pool) ([]*models.Armor, error) {
-	rows, err := pool.Query(context.Background(), `
+func (r *ArmorRepo) GetAllArmors() ([]*models.Armor, error) {
+	rows, err := r.storage.Query(context.Background(), `
 		SELECT id::text, name, description, cost, attr, created, updated
 		FROM armors
 		ORDER BY created DESC
@@ -126,9 +136,9 @@ func GetAllArmors(pool *pgxpool.Pool) ([]*models.Armor, error) {
 	return armors, nil
 }
 
-func armorExists(ctx context.Context, pool *pgxpool.Pool, armorID string) (bool, error) {
+func (r *ArmorRepo) armorExists(ctx context.Context, armorID string) (bool, error) {
 	var exists bool
-	err := pool.QueryRow(ctx, `
+	err := r.storage.QueryRow(ctx, `
 		SELECT EXISTS(SELECT 1 FROM armors WHERE id = $1::uuid)
 	`, armorID).Scan(&exists)
 	if err != nil {

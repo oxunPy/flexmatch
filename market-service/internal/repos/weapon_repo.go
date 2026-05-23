@@ -5,17 +5,27 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"market-service/internal/database"
 
 	"market-service/internal/models"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func BuyWeapon(pool *pgxpool.Pool, weaponID string, playerID int64) (*models.PlayerWeapon, error) {
+type WeaponRepo struct {
+	storage *database.PostgresStorage
+}
+
+func NewWeaponRepo(storage *database.PostgresStorage) *WeaponRepo {
+	return &WeaponRepo{
+		storage: storage,
+	}
+}
+
+func (r *WeaponRepo) BuyWeapon(weaponID string, playerID int64) (*models.PlayerWeapon, error) {
 	ctx := context.Background()
 
-	exists, err := weaponExists(ctx, pool, weaponID)
+	exists, err := r.weaponExists(ctx, weaponID)
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +34,7 @@ func BuyWeapon(pool *pgxpool.Pool, weaponID string, playerID int64) (*models.Pla
 	}
 
 	var playerWeapon models.PlayerWeapon
-	err = pool.QueryRow(ctx, `
+	err = r.storage.QueryRow(ctx, `
 		INSERT INTO player_weapons (player_id, weapon_id)
 		VALUES ($1, $2::uuid)
 		ON CONFLICT (player_id, weapon_id) DO UPDATE SET weapon_id = EXCLUDED.weapon_id
@@ -37,8 +47,8 @@ func BuyWeapon(pool *pgxpool.Pool, weaponID string, playerID int64) (*models.Pla
 	return &playerWeapon, nil
 }
 
-func SellWeapon(pool *pgxpool.Pool, weaponID string, playerID int64) (bool, error) {
-	commandTag, err := pool.Exec(context.Background(), `
+func (r *WeaponRepo) SellWeapon(weaponID string, playerID int64) (bool, error) {
+	commandTag, err := r.storage.Exec(context.Background(), `
 		DELETE FROM player_weapons
 		WHERE player_id = $1 AND weapon_id = $2::uuid
 	`, playerID, weaponID)
@@ -49,7 +59,7 @@ func SellWeapon(pool *pgxpool.Pool, weaponID string, playerID int64) (bool, erro
 	return commandTag.RowsAffected() > 0, nil
 }
 
-func CreateWeapon(pool *pgxpool.Pool, weapon models.Weapon) (*models.Weapon, error) {
+func (r *WeaponRepo) CreateWeapon(weapon models.Weapon) (*models.Weapon, error) {
 	attr, err := json.Marshal(weapon.Attr)
 	if err != nil {
 		return nil, fmt.Errorf("encode weapon attr: %w", err)
@@ -57,7 +67,7 @@ func CreateWeapon(pool *pgxpool.Pool, weapon models.Weapon) (*models.Weapon, err
 
 	var created models.Weapon
 	var rawAttr []byte
-	err = pool.QueryRow(context.Background(), `
+	err = r.storage.QueryRow(context.Background(), `
 		INSERT INTO weapons (name, description, weapon_type, cost, attr)
 		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id::text, name, description, weapon_type, cost, attr, created, updated
@@ -84,8 +94,8 @@ func CreateWeapon(pool *pgxpool.Pool, weapon models.Weapon) (*models.Weapon, err
 	return &created, nil
 }
 
-func GetAllWeapons(pool *pgxpool.Pool) ([]*models.Weapon, error) {
-	rows, err := pool.Query(context.Background(), `
+func (r *WeaponRepo) GetAllWeapons() ([]*models.Weapon, error) {
+	rows, err := r.storage.Query(context.Background(), `
 		SELECT id::text, name, description, weapon_type, cost, attr, created, updated
 		FROM weapons
 		ORDER BY created DESC
@@ -128,9 +138,9 @@ func GetAllWeapons(pool *pgxpool.Pool) ([]*models.Weapon, error) {
 	return weapons, nil
 }
 
-func weaponExists(ctx context.Context, pool *pgxpool.Pool, weaponID string) (bool, error) {
+func (r *WeaponRepo) weaponExists(ctx context.Context, weaponID string) (bool, error) {
 	var exists bool
-	err := pool.QueryRow(ctx, `
+	err := r.storage.QueryRow(ctx, `
 		SELECT EXISTS(SELECT 1 FROM weapons WHERE id = $1::uuid)
 	`, weaponID).Scan(&exists)
 	if err != nil {

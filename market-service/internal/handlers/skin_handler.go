@@ -6,10 +6,8 @@ import (
 	"net/http"
 
 	"market-service/internal/models"
-	"market-service/internal/repos"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type BuySkinRequest struct {
@@ -23,7 +21,7 @@ type BuySkinResponse struct {
 	SkinID  string `json:"skin_id"`
 }
 
-func BuySkinHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+func (rest *RestController) BuySkinHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req BuySkinRequest
 		if err := c.BindJSON(&req); err != nil {
@@ -33,7 +31,7 @@ func BuySkinHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 			return
 		}
 
-		playerSkin, err := repos.BuySkin(pool, req.SkinID, req.PlayerID)
+		playerSkin, err := rest.SkinRepo.BuySkin(req.SkinID, req.PlayerID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": fmt.Sprintf("error buying skin: %s", err.Error()),
@@ -60,7 +58,7 @@ type SellSkinResponse struct {
 	SkinID  string `json:"skin_id"`
 }
 
-func SellSkinHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+func (rest *RestController) SellSkinHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req SellSkinRequest
 		if err := c.BindJSON(&req); err != nil {
@@ -70,7 +68,7 @@ func SellSkinHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 			return
 		}
 
-		success, err := repos.SellSkin(pool, req.SkinID, req.PlayerID)
+		success, err := rest.SkinRepo.SellSkin(req.SkinID, req.PlayerID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": fmt.Sprintf("error selling skin: %s", err.Error()),
@@ -98,7 +96,7 @@ type CreateSkinResponse struct {
 	Skin    models.Skin `json:"skin"`
 }
 
-func CreateSkinHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+func (rest *RestController) CreateSkinHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req CreateSkinRequest
 		if err := c.BindJSON(&req); err != nil {
@@ -118,7 +116,7 @@ func CreateSkinHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 			}
 		}
 
-		skin, err := repos.CreateSkin(pool, models.Skin{
+		skin, err := rest.SkinRepo.CreateSkin(models.Skin{
 			Name: req.Name,
 			Cost: req.Cost,
 			Attr: attr,
@@ -143,9 +141,9 @@ type GetAllSkinsResponse struct {
 	List    []*models.Skin `json:"list"`
 }
 
-func GetAllSkinsHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+func (rest *RestController) GetAllSkinsHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		list, err := repos.GetAllSkins(pool)
+		list, err := rest.SkinRepo.GetAllSkins()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": fmt.Sprintf("error get all skins: %s\n", err.Error()),
