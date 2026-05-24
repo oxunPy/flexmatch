@@ -3,6 +3,7 @@ package app
 import (
 	"market-service/internal/config"
 	"market-service/internal/database"
+	"market-service/internal/grpc"
 	"market-service/internal/repos"
 	"market-service/internal/services"
 )
@@ -20,6 +21,10 @@ type AppContainer struct {
 	ArmorService  *services.ArmorService
 	SkinService   *services.SkinService
 	WeaponService *services.WeaponService
+
+	// client
+	FileClient    *grpc.FileClient
+	PaymentClient *grpc.PaymentClient
 }
 
 func NewContainer(cfg *config.Config) *AppContainer {
@@ -33,6 +38,9 @@ func NewContainer(cfg *config.Config) *AppContainer {
 	skinService := services.NewSkinService(skinRepo)
 	weaponService := services.NewWeaponService(weaponRepo)
 
+	fileClient, _ := grpc.NewFileClient(cfg.FileGrpcPort)
+	paymentClient, _ := grpc.NewPaymentClient(cfg.PaymentGrpcPort)
+
 	return &AppContainer{
 		cfg,
 		storage,
@@ -42,6 +50,8 @@ func NewContainer(cfg *config.Config) *AppContainer {
 		armorService,
 		skinService,
 		weaponService,
+		fileClient,
+		paymentClient,
 	}
 }
 

@@ -3,8 +3,10 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	v1 "protos-service/protos/gen/file/protobuf"
+	"strconv"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -33,8 +35,8 @@ const serviceConfig = `{
 	}]
 }`
 
-func NewFileClient(url string) (*FileClient, error) {
-	conn, err := grpc.NewClient(url,
+func NewFileClient(port int) (*FileClient, error) {
+	conn, err := grpc.NewClient("localhost:"+strconv.Itoa(port),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithChainUnaryInterceptor(
 			func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
@@ -59,4 +61,60 @@ func NewFileClient(url string) (*FileClient, error) {
 	return &FileClient{
 		client: v1.NewFileServiceClient(conn),
 	}, nil
+}
+
+func (c *FileClient) UploadFile(ctx context.Context, name, contentType string, content []byte) (*v1.UploadFileResponse, error) {
+	req := &v1.UploadFileRequest{
+		Name:        name,
+		ContentType: contentType,
+		Content:     content,
+	}
+
+	resp, err := c.client.UploadFile(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("upload file error: %w", err)
+	}
+
+	if !resp.Success {
+		return nil, fmt.Errorf("upload failed: %s", resp.Error)
+	}
+	return resp, nil
+}
+
+func (c *FileClient) GetFile(ctx context.Context, fileID string) (*v1.GetFileResponse, error) {
+	req := &v1.GetFileRequest{
+		FileId: fileID,
+	}
+
+	stream, err := c.client.GetFile(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("get file stream error: %w", err)
+	}
+
+	var result *v1.GetFileResponse
+
+	for {
+		chunk, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, fmt.Errorf("stream recv error: %w", err)
+		}
+
+		if result == nil {
+			result = &v1.GetFileResponse{
+				FileId:      chunk.FileId,
+				Name:        chunk.Name,
+				ContentType: chunk.ContentType,
+			}
+		}
+
+		result.Content = append(result.Content, chunk.Content...)
+	}
+
+	if result == nil {
+		return nil, fmt.Errorf("empty response for file: %s", fileID)
+	}
+	return result, nil
 }

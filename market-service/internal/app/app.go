@@ -16,9 +16,9 @@ type App struct {
 
 func New(cfg *config.Config) *App {
 	ct := NewContainer(cfg)
-	router := net.NewRouter(cfg.Port)
+	router := net.NewRouter(cfg.HttpPort)
 
-	server := grpc.NewServer(cfg.Gport)
+	server := grpc.NewServer(cfg.GrpcPort)
 	grpc.RegisterSkinServiceApi(server, ct.SkinService)
 	grpc.RegisterArmorServiceApi(server, ct.ArmorService)
 	grpc.RegisterWeaponServiceApi(server, ct.WeaponService)

@@ -9,11 +9,11 @@ import (
 )
 
 type Config struct {
-	DatabaseURL  string
-	Port         int
-	Gport        int
-	FileGport    int
-	PaymentGport int
+	DatabaseURL     string
+	HttpPort        int
+	GrpcPort        int
+	FileGrpcPort    int
+	PaymentGrpcPort int
 }
 
 func LoadConfig() (*Config, error) {
@@ -21,7 +21,7 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("error loading .env config file")
 	}
 
-	port, err := strconv.Atoi(os.Getenv("PORT"))
+	hport, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
 		return nil, fmt.Errorf("err config PORT")
 	}
@@ -42,10 +42,10 @@ func LoadConfig() (*Config, error) {
 	}
 
 	return &Config{
-		DatabaseURL:  os.Getenv("DATABASE_URL"),
-		Port:         port,
-		Gport:        gport,
-		FileGport:    fileGport,
-		PaymentGport: paymentGport,
+		DatabaseURL:     os.Getenv("DATABASE_URL"),
+		HttpPort:        hport,
+		GrpcPort:        gport,
+		FileGrpcPort:    fileGport,
+		PaymentGrpcPort: paymentGport,
 	}, nil
 }
