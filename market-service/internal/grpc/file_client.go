@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	v1 "protos-service/protos/gen/file/protobuf"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 type FileClient struct {
+	client v1.FileServiceClient
 }
 
 const serviceConfig = `{
@@ -53,6 +55,8 @@ func NewFileClient(url string) (*FileClient, error) {
 	if err != nil {
 		return nil, fmt.Errorf("err connection gprc file service: %v", err)
 	}
-	client := v1.NewPaymentServiceClient()
-	return &FileClient{}
+
+	return &FileClient{
+		client: v1.NewFileServiceClient(conn),
+	}, nil
 }

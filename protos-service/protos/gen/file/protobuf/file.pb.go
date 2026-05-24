@@ -24,7 +24,7 @@ const (
 type UploadFileRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	ContentType   string                 `protobuf:"bytes,2,opt,name=content_type,json=contentType,proto3" json:"content_type,omitempty"`
 	Content       []byte                 `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -67,9 +67,9 @@ func (x *UploadFileRequest) GetName() string {
 	return ""
 }
 
-func (x *UploadFileRequest) GetType() string {
+func (x *UploadFileRequest) GetContentType() string {
 	if x != nil {
-		return x.Type
+		return x.ContentType
 	}
 	return ""
 }
@@ -85,6 +85,8 @@ type UploadFileResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	FileId        string                 `protobuf:"bytes,1,opt,name=file_id,json=fileId,proto3" json:"file_id,omitempty"`
 	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
+	Error         string                 `protobuf:"bytes,3,opt,name=error,proto3" json:"error,omitempty"`
+	Url           string                 `protobuf:"bytes,4,opt,name=url,proto3" json:"url,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -131,6 +133,20 @@ func (x *UploadFileResponse) GetSuccess() bool {
 		return x.Success
 	}
 	return false
+}
+
+func (x *UploadFileResponse) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
+func (x *UploadFileResponse) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
 }
 
 type GetFileRequest struct {
@@ -181,6 +197,8 @@ type GetFileResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	FileId        string                 `protobuf:"bytes,1,opt,name=file_id,json=fileId,proto3" json:"file_id,omitempty"`
 	Content       []byte                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
+	ContentType   string                 `protobuf:"bytes,3,opt,name=content_type,json=contentType,proto3" json:"content_type,omitempty"`
+	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -229,23 +247,41 @@ func (x *GetFileResponse) GetContent() []byte {
 	return nil
 }
 
+func (x *GetFileResponse) GetContentType() string {
+	if x != nil {
+		return x.ContentType
+	}
+	return ""
+}
+
+func (x *GetFileResponse) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
 var File_protobuf_file_proto protoreflect.FileDescriptor
 
 const file_protobuf_file_proto_rawDesc = "" +
 	"\n" +
-	"\x13protobuf/file.proto\x12\x04file\"U\n" +
+	"\x13protobuf/file.proto\x12\x04file\"d\n" +
 	"\x11UploadFileRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
-	"\x04type\x18\x02 \x01(\tR\x04type\x12\x18\n" +
-	"\acontent\x18\x03 \x01(\fR\acontent\"G\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12!\n" +
+	"\fcontent_type\x18\x02 \x01(\tR\vcontentType\x12\x18\n" +
+	"\acontent\x18\x03 \x01(\fR\acontent\"o\n" +
 	"\x12UploadFileResponse\x12\x17\n" +
 	"\afile_id\x18\x01 \x01(\tR\x06fileId\x12\x18\n" +
-	"\asuccess\x18\x02 \x01(\bR\asuccess\")\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x14\n" +
+	"\x05error\x18\x03 \x01(\tR\x05error\x12\x10\n" +
+	"\x03url\x18\x04 \x01(\tR\x03url\")\n" +
 	"\x0eGetFileRequest\x12\x17\n" +
-	"\afile_id\x18\x01 \x01(\tR\x06fileId\"D\n" +
+	"\afile_id\x18\x01 \x01(\tR\x06fileId\"{\n" +
 	"\x0fGetFileResponse\x12\x17\n" +
 	"\afile_id\x18\x01 \x01(\tR\x06fileId\x12\x18\n" +
-	"\acontent\x18\x02 \x01(\fR\acontent2\x88\x01\n" +
+	"\acontent\x18\x02 \x01(\fR\acontent\x12!\n" +
+	"\fcontent_type\x18\x03 \x01(\tR\vcontentType\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name2\x88\x01\n" +
 	"\vFileService\x12?\n" +
 	"\n" +
 	"UploadFile\x12\x17.file.UploadFileRequest\x1a\x18.file.UploadFileResponse\x128\n" +
