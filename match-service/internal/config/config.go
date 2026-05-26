@@ -12,9 +12,7 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
-	if err := godotenv.Load(); err != nil {
-		return nil, err
-	}
+	_ = godotenv.Load()
 
 	return &Config{
 		DatabaseUrl: os.Getenv("DATABASE_URL"),

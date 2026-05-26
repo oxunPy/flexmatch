@@ -17,9 +17,7 @@ type Config struct {
 }
 
 func Load() (*Config, error) {
-	if err := godotenv.Load(); err != nil {
-		return nil, fmt.Errorf("err loading .env file: %w", err)
-	}
+	_ = godotenv.Load()
 
 	gport, err := strconv.Atoi(os.Getenv("GRPC_PORT"))
 	if err != nil {

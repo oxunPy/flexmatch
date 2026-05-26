@@ -1,6 +1,8 @@
 package app
 
 import (
+	"log"
+
 	"auth-service/internal/config"
 	"auth-service/internal/grpc"
 	"auth-service/internal/net"
@@ -36,8 +38,15 @@ func (a *App) GetGinRouter() *net.GinRouter {
 }
 
 func (a *App) Run() {
-	a.grpc.Run()
-	a.router.Run()
+	go func() {
+		if err := a.grpc.Run(); err != nil {
+			log.Println("grpc server stopped:", err)
+		}
+	}()
+
+	if err := a.router.Run(); err != nil {
+		log.Println("http server stopped:", err)
+	}
 }
 
 func (a *App) Stop() {

@@ -1,0 +1,189 @@
+name: flexmatch
+
+x-postgres-env: &postgres-env
+  POSTGRES_USER: flexmatch
+  POSTGRES_PASSWORD: flexmatch
+
+x-postgres-healthcheck: &postgres-healthcheck
+  test: ["CMD-SHELL", "pg_isready -U flexmatch"]
+  interval: 5s
+  timeout: 5s
+  retries: 10
+
+services:
+  auth-db:
+    image: postgres:16-alpine
+    environment:
+      <<: *postgres-env
+      POSTGRES_DB: flexmatch_auth
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+    healthcheck: *postgres-healthcheck
+
+  market-db:
+    image: postgres:16-alpine
+    environment:
+      <<: *postgres-env
+      POSTGRES_DB: flexmatch_market
+    volumes:
+      - market-db-data:/var/lib/postgresql/data
+    healthcheck: *postgres-healthcheck
+
+  match-db:
+    image: postgres:16-alpine
+    environment:
+      <<: *postgres-env
+      POSTGRES_DB: flexmatch_match
+    volumes:
+      - match-db-data:/var/lib/postgresql/data
+    healthcheck: *postgres-healthcheck
+
+  payment-db:
+    image: postgres:16-alpine
+    environment:
+      <<: *postgres-env
+      POSTGRES_DB: flexmatch_payment
+    volumes:
+      - payment-db-data:/var/lib/postgresql/data
+    healthcheck: *postgres-healthcheck
+
+  file-db:
+    image: postgres:16-alpine
+    environment:
+      <<: *postgres-env
+      POSTGRES_DB: flexmatch_file
+    volumes:
+      - file-db-data:/var/lib/postgresql/data
+    healthcheck: *postgres-healthcheck
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    env_file:
+      - ./auth-service/.env
+    environment:
+      DATABASE_URL: postgres://flexmatch:flexmatch@auth-db:5432/flexmatch_auth?sslmode=disable
+      PORT: 3000
+      GRPC_PORT: 50050
+    ports:
+      - "3000:3000"
+      - "50050:50050"
+    depends_on:
+      auth-db:
+        condition: service_healthy
+
+  file-service:
+    build:
+      context: .
+      dockerfile: file-service/Dockerfile
+    env_file:
+      - ./file-service/.env
+    environment:
+      DATABASE_URL: postgres://flexmatch:flexmatch@file-db:5432/flexmatch_file?sslmode=disable
+      HTTP_PORT: 3002
+      GRPC_PORT: 50052
+      STORAGE_PATH: /data/storage
+      BASE_URL: http://localhost:3002
+    ports:
+      - "3002:3002"
+      - "50052:50052"
+    volumes:
+      - file-storage:/data/storage
+    depends_on:
+      file-db:
+        condition: service_healthy
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: payment-service/Dockerfile
+    env_file:
+      - ./payment-service/.env
+    environment:
+      DATABASE_URL: postgres://flexmatch:flexmatch@payment-db:5432/flexmatch_payment?sslmode=disable
+      PORT: 3007
+      GRPC_PORT: 50057
+    ports:
+      - "3007:3007"
+      - "50057:50057"
+    depends_on:
+      payment-db:
+        condition: service_healthy
+
+  market-service:
+    build:
+      context: .
+      dockerfile: market-service/Dockerfile
+    env_file:
+      - ./market-service/.env
+    environment:
+      DATABASE_URL: postgres://flexmatch:flexmatch@market-db:5432/flexmatch_market?sslmode=disable
+      PORT: 3004
+      GPORT: 50054
+      FILE_SERVICE_GRPC_HOST: file-service
+      FILE_SERVICE_GPORT: 50052
+      PAYMENT_SERVICE_GRPC_HOST: payment-service
+      PAYMENT_SERVICE_GPORT: 50057
+    ports:
+      - "3004:3004"
+      - "50054:50054"
+    depends_on:
+      market-db:
+        condition: service_healthy
+      file-service:
+        condition: service_started
+      payment-service:
+        condition: service_started
+
+  match-service:
+    build:
+      context: .
+      dockerfile: match-service/Dockerfile
+    env_file:
+      - ./match-service/.env
+    environment:
+      DATABASE_URL: postgres://flexmatch:flexmatch@match-db:5432/flexmatch_match?sslmode=disable
+      PORT: 3005
+    ports:
+      - "3005:3005"
+    depends_on:
+      match-db:
+        condition: service_healthy
+
+  game-service:
+    build:
+      context: .
+      dockerfile: game-service/Dockerfile
+    env_file:
+      - ./game-service/.env
+    ports:
+      - "3003:3003"
+
+  chat-service:
+    build:
+      context: .
+      dockerfile: chat-service/Dockerfile
+    env_file:
+      - ./chat-service/.env
+    ports:
+      - "3001:3001"
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    env_file:
+      - ./notification-service/.env
+    environment:
+      PORT: 3006
+    ports:
+      - "3006:3006"
+
+volumes:
+  auth-db-data:
+  market-db-data:
+  match-db-data:
+  payment-db-data:
+  file-db-data:
+  file-storage:

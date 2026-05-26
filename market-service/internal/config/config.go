@@ -12,14 +12,14 @@ type Config struct {
 	DatabaseURL     string
 	HttpPort        int
 	GrpcPort        int
+	FileGrpcHost    string
 	FileGrpcPort    int
+	PaymentGrpcHost string
 	PaymentGrpcPort int
 }
 
 func LoadConfig() (*Config, error) {
-	if err := godotenv.Load(); err != nil {
-		return nil, fmt.Errorf("error loading .env config file")
-	}
+	_ = godotenv.Load()
 
 	hport, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
@@ -45,7 +45,18 @@ func LoadConfig() (*Config, error) {
 		DatabaseURL:     os.Getenv("DATABASE_URL"),
 		HttpPort:        hport,
 		GrpcPort:        gport,
+		FileGrpcHost:    envOrDefault("FILE_SERVICE_GRPC_HOST", "localhost"),
 		FileGrpcPort:    fileGport,
+		PaymentGrpcHost: envOrDefault("PAYMENT_SERVICE_GRPC_HOST", "localhost"),
 		PaymentGrpcPort: paymentGport,
 	}, nil
+}
+
+func envOrDefault(key, fallback string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return fallback
+	}
+
+	return value
 }

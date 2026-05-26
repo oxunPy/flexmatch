@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	v1 "protos-service/protos/gen/payment/protobuf"
-	"strconv"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -15,8 +14,8 @@ type PaymentClient struct {
 	client v1.PaymentServiceClient
 }
 
-func NewPaymentClient(port int) (*PaymentClient, error) {
-	conn, err := grpc.NewClient("localhost:"+strconv.Itoa(port),
+func NewPaymentClient(addr string) (*PaymentClient, error) {
+	conn, err := grpc.NewClient(addr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithChainUnaryInterceptor(
 			func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {

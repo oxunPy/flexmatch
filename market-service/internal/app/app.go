@@ -1,6 +1,8 @@
 package app
 
 import (
+	"log"
+
 	"market-service/internal/config"
 	"market-service/internal/grpc"
 	"market-service/internal/net"
@@ -39,8 +41,15 @@ func (a *App) GetGinRouter() *net.GinRouter {
 }
 
 func (a *App) Run() {
-	a.grpcServer.Run()
-	a.router.Run()
+	go func() {
+		if err := a.grpcServer.Run(); err != nil {
+			log.Println("grpc server stopped:", err)
+		}
+	}()
+
+	if err := a.router.Run(); err != nil {
+		log.Println("http server stopped:", err)
+	}
 }
 
 func (a *App) Stop() {

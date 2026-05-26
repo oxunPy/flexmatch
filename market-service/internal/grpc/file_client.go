@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	v1 "protos-service/protos/gen/file/protobuf"
-	"strconv"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -35,8 +34,8 @@ const serviceConfig = `{
 	}]
 }`
 
-func NewFileClient(port int) (*FileClient, error) {
-	conn, err := grpc.NewClient("localhost:"+strconv.Itoa(port),
+func NewFileClient(addr string) (*FileClient, error) {
+	conn, err := grpc.NewClient(addr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithChainUnaryInterceptor(
 			func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {

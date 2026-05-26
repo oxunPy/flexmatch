@@ -16,11 +16,7 @@ type Config struct {
 }
 
 func Load() (*Config, error) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Warning: .env file not found, using environment variables")
-		return nil, err
-	}
+	_ = godotenv.Load()
 
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {

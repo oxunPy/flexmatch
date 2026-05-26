@@ -1,6 +1,8 @@
 package app
 
 import (
+	"fmt"
+
 	"market-service/internal/config"
 	"market-service/internal/database"
 	"market-service/internal/grpc"
@@ -38,8 +40,8 @@ func NewContainer(cfg *config.Config) *AppContainer {
 	skinService := services.NewSkinService(skinRepo)
 	weaponService := services.NewWeaponService(weaponRepo)
 
-	fileClient, _ := grpc.NewFileClient(cfg.FileGrpcPort)
-	paymentClient, _ := grpc.NewPaymentClient(cfg.PaymentGrpcPort)
+	fileClient, _ := grpc.NewFileClient(fmt.Sprintf("%s:%d", cfg.FileGrpcHost, cfg.FileGrpcPort))
+	paymentClient, _ := grpc.NewPaymentClient(fmt.Sprintf("%s:%d", cfg.PaymentGrpcHost, cfg.PaymentGrpcPort))
 
 	return &AppContainer{
 		cfg,
